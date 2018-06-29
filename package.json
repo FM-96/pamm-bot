@@ -13,7 +13,8 @@
   "author": "Felix Müllner",
   "license": "MIT",
   "dependencies": {
-    "discord.js": "^11.3.2"
+    "discord.js": "^11.3.2",
+    "snekfetch": "^4.0.4"
   },
   "devDependencies": {
     "eslint": "^4.19.1"
