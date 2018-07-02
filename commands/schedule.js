@@ -20,7 +20,7 @@ module.exports = {
 		});
 
 		const fields = [
-			'User',
+			'',
 			'1 Mon',
 			'2 Tue',
 			'3 Wed',
