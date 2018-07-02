@@ -62,6 +62,9 @@ client.on('message', async (message) => {
 });
 
 client.on('messageReactionAdd', (reaction, user) => {
+	if (reaction.message.author.id !== client.user.id) {
+		return;
+	}
 	if (user.id === client.user.id) {
 		return;
 	}
@@ -74,6 +77,9 @@ client.on('messageReactionAdd', (reaction, user) => {
 });
 
 client.on('messageReactionRemove', (reaction, user) => {
+	if (reaction.message.author.id !== client.user.id) {
+		return;
+	}
 	if (user.id === client.user.id) {
 		return;
 	}
