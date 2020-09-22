@@ -1,9 +1,9 @@
+const commandHandler = require('command-handler');
 const Discord = require('discord.js');
 
 const path = require('path');
 
 const auth = require('./auth.json');
-const commandHandler = require('./command-handler.js');
 const EMOJI = require('./emoji.js');
 const scheduleUtil = require('./schedule-util.js');
 
