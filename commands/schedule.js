@@ -7,8 +7,8 @@ module.exports = {
 	run: async (message, context) => {
 		const tableTitle = message.content.slice(context.prefix.length + 'schedule'.length);
 
-		await message.guild.fetchMembers();
-		const nonBotMembers = message.guild.members.filterArray(e => !e.user.bot);
+		await message.guild.members.fetch();
+		const nonBotMembers = message.guild.members.cache.array().filter(e => !e.user.bot);
 		nonBotMembers.sort((a, b) => {
 			if (a.displayName.toLowerCase() < b.displayName.toLowerCase()) {
 				return -1;

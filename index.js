@@ -7,13 +7,13 @@ const auth = require('./auth.json');
 const EMOJI = require('./emoji.js');
 const scheduleUtil = require('./schedule-util.js');
 
-commandHandler.setPrefixes('pamm!');
+commandHandler.setGlobalPrefixes('pamm!');
 
 // register commands
 try {
 	const registerResults = commandHandler.registerCommandsFolder(path.join(__dirname, 'commands'));
 	console.log(`${registerResults.registered} commands registered`);
-	console.log(`${registerResults.deactivated} commands deactivated`);
+	console.log(`${registerResults.disabled} commands disabled`);
 } catch (err) {
 	console.error('Error while registering commands:');
 	console.error(err);
@@ -24,14 +24,23 @@ try {
 try {
 	const registerResults = commandHandler.registerTasksFolder(path.join(__dirname, 'tasks'));
 	console.log(`${registerResults.registered} tasks registered`);
-	console.log(`${registerResults.deactivated} tasks deactivated`);
+	console.log(`${registerResults.disabled} tasks disabled`);
 } catch (err) {
 	console.error('Error while registering tasks:');
 	console.error(err);
 	process.exit(1);
 }
 
-const client = new Discord.Client();
+const client = new Discord.Client({
+	partials: [
+		'MESSAGE',
+		'REACTION',
+		'USER',
+	],
+	ws: {
+		intents: Discord.Intents.NON_PRIVILEGED | Discord.Intents.FLAGS.GUILD_MEMBERS,
+	},
+});
 
 client.on('ready', () => {
 	console.log('Bot is ready');
@@ -61,7 +70,15 @@ client.on('message', async (message) => {
 	}
 });
 
-client.on('messageReactionAdd', (reaction, user) => {
+client.on('messageReactionAdd', async (reaction, user) => {
+	if (reaction.partial) {
+		try {
+			await reaction.fetch();
+		} catch (err) {
+			console.error('Error while fetching reaction:');
+			console.error(err);
+		}
+	}
 	if (reaction.message.author.id !== client.user.id) {
 		return;
 	}
@@ -89,37 +106,6 @@ client.on('messageReactionRemove', (reaction, user) => {
 	scheduleUtil.refreshTable(reaction.message).catch(err => {
 		console.error(err);
 	});
-});
-
-// from https://gist.github.com/Danktuary/27b3cef7ef6c42e2d3f5aff4779db8ba
-const events = {
-	MESSAGE_REACTION_ADD: 'messageReactionAdd',
-	MESSAGE_REACTION_REMOVE: 'messageReactionRemove',
-};
-client.on('raw', async event => {
-	// `event.t` is the raw event name
-	if (!events.hasOwnProperty(event.t)) {
-		return;
-	}
-
-	const {d: data} = event;
-	const user = client.users.get(data.user_id);
-	const channel = client.channels.get(data.channel_id) || await user.createDM();
-
-	// if the message is already in the cache, don't re-emit the event
-	if (channel.messages.has(data.message_id)) {
-		return;
-	}
-
-	// if you're on the master/v12 branch, use `channel.messages.fetch()`
-	const message = await channel.fetchMessage(data.message_id);
-
-	// custom emojis reactions are keyed in a `name:ID` format, while unicode emojis are keyed by names
-	// if you're on the master/v12 branch, custom emojis reactions are keyed by their ID
-	const emojiKey = (data.emoji.id) ? `${data.emoji.name}:${data.emoji.id}` : data.emoji.name;
-	const reaction = message.reactions.get(emojiKey);
-
-	client.emit(events[event.t], reaction, user);
 });
 
 client.login(auth.token).then(() => {

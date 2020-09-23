@@ -132,8 +132,8 @@ async function refreshTable(message) {
 		tableTitle = tableStringLines[1].slice(1, -1).trim();
 	}
 
-	await message.guild.fetchMembers();
-	const nonBotMembers = message.guild.members.filterArray(e => !e.user.bot);
+	await message.guild.members.fetch();
+	const nonBotMembers = message.guild.members.cache.array().filter(e => !e.user.bot);
 	nonBotMembers.sort((a, b) => {
 		if (a.displayName.toLowerCase() < b.displayName.toLowerCase()) {
 			return -1;
@@ -144,9 +144,12 @@ async function refreshTable(message) {
 		return 0;
 	});
 
-	const reactions = message.reactions.filterArray(e => Object.values(EMOJI).includes(e.emoji.name));
+	for (const reaction of message.reactions.cache.array().filter(e => e.partial)) {
+		await reaction.fetch();
+	}
+	const reactions = message.reactions.cache.array().filter(e => Object.values(EMOJI).includes(e.emoji.name));
 
-	const reactionUsers = await Promise.all(reactions.map(e => e.fetchUsers()));
+	const reactionUsers = await Promise.all(reactions.map(e => e.users.fetch()));
 
 	const reactionUserMap = new Map();
 

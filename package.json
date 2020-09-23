@@ -13,8 +13,8 @@
   "author": "Felix Müllner",
   "license": "MIT",
   "dependencies": {
-    "command-handler": "github:FM-96/command-handler#semver:0.2.x",
-    "discord.js": "^11.3.2",
+    "command-handler": "github:FM-96/command-handler#semver:0.7.x",
+    "discord.js": "^12.3.1",
     "snekfetch": "^4.0.4"
   },
   "devDependencies": {
