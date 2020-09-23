@@ -1,4 +1,4 @@
-const snekfetch = require('snekfetch');
+const got = require('got');
 
 const auth = require('../auth.json');
 
@@ -14,7 +14,7 @@ module.exports = {
 			isRunning = true;
 			let success;
 
-			snekfetch.get(auth.decksUrl).then((result) => {
+			got(auth.decksUrl, {responseType: 'json'}).then((result) => {
 				success = result.body.success;
 				if (!success) {
 					console.error('Script execution returned an error:');
@@ -22,7 +22,7 @@ module.exports = {
 				}
 			}).catch((err) => {
 				success = false;
-				console.error('Snekfetch error:');
+				console.error('Got error:');
 				console.error(err);
 			}).then(async (res) => {
 				try {
